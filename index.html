@@ -1,0 +1,2460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daladala Passenger System | Modern</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --daladala-green: #1e7e34;
+      --daladala-dark: #0e3d1c;
+      --daladala-light: #e9f5ec;
+      --daladala-accent: #2ecc71;
+      --daladala-warning: #f39c12;
+      --daladala-danger: #e74c3c;
+      --daladala-teal: #0d9488;
+    }
+    * { box-sizing: border-box; }
+    body {
+      background: #f4f7f6;
+      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      background: linear-gradient(180deg, var(--daladala-dark) 0%, #0a2e14 100%);
+      color: white;
+      min-height: 100vh;
+      transition: all 0.3s;
+      z-index: 1040;
+    }
+    .sidebar .nav-link {
+      color: rgba(255,255,255,0.82);
+      border-radius: 10px;
+      margin: 3px 10px;
+      padding: 11px 16px;
+      font-weight: 500;
+      font-size: 0.93rem;
+      transition: all 0.18s;
+      display: flex;
+      align-items: center;
+    }
+    .sidebar .nav-link:hover, .sidebar .nav-link.active {
+      background: var(--daladala-green);
+      color: white;
+      transform: translateX(3px);
+    }
+    .sidebar .nav-link i { margin-right: 10px; width: 20px; font-size: 1.05rem; }
+    .brand {
+      font-weight: 700;
+      font-size: 1.35rem;
+      padding: 22px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+    }
+    .brand i { color: var(--daladala-accent); margin-right: 10px; font-size: 1.6rem; }
+    .brand small { font-size: 0.6rem; color: rgba(255,255,255,0.55); display: block; font-weight: 400; letter-spacing: 0.5px; }
+    /* ===== CARDS ===== */
+    .stat-card {
+      border: none;
+      border-radius: 18px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+      transition: transform 0.22s, box-shadow 0.22s;
+      background: white;
+    }
+    .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 24px rgba(0,0,0,0.09); }
+    .stat-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+    }
+    .bg-green-light { background: #d4edda; color: #155724; }
+    .bg-blue-light { background: #d1ecf1; color: #0c5460; }
+    .bg-yellow-light { background: #fff3cd; color: #856404; }
+    .bg-red-light { background: #f8d7da; color: #721c24; }
+    .bg-teal-light { background: #d1f2eb; color: #0d9488; }
+    .capacity-bar { height: 14px; border-radius: 8px; }
+    .touch-btn { padding: 14px 20px; font-size: 1.05rem; border-radius: 14px; font-weight: 600; }
+    .chart-container { position: relative; height: 250px; width: 100%; }
+    .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
+    .table-responsive { border-radius: 14px; overflow: hidden; }
+    .table th {
+      background: var(--daladala-light); color: var(--daladala-dark);
+      font-weight: 600; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px;
+      border: none;
+    }
+    .table tbody tr { transition: background 0.15s; }
+    .table tbody tr:hover { background: #f8fdf9; }
+    .alert-destination {
+      background: #fff3cd; border-left: 5px solid #f39c12;
+      border-radius: 10px; animation: pulseAlert 1.5s infinite;
+    }
+    @keyframes pulseAlert {
+      0% { box-shadow: 0 0 0 0 rgba(243,156,18,0.4); }
+      70% { box-shadow: 0 0 0 12px rgba(243,156,18,0); }
+      100% { box-shadow: 0 0 0 0 rgba(243,156,18,0); }
+    }
+    .btn-green { background: var(--daladala-green); color: white; font-weight: 600; border: none; }
+    .btn-green:hover { background: #155d27; color: white; }
+    .sidebar-toggler { display: none; }
+    .live-dot {
+      display: inline-block; width: 9px; height: 9px;
+      background: #2ecc71; border-radius: 50%; margin-right: 6px;
+      animation: blink 1.2s infinite;
+    }
+    @keyframes blink { 50% { opacity: 0.3; } }
+    .quick-action {
+      cursor: pointer; border: 2px solid var(--daladala-light);
+      border-radius: 16px; padding: 22px 12px; text-align: center;
+      transition: all 0.22s; background: white;
+    }
+    .quick-action:hover {
+      border-color: var(--daladala-green);
+      background: var(--daladala-light);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(30,126,52,0.12);
+    }
+    .quick-action i { font-size: 2rem; color: var(--daladala-green); }
+    .seat-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+      gap: 6px; margin-top: 10px;
+    }
+    .seat {
+      width: 30px; height: 30px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.68rem; font-weight: 700;
+    }
+    .seat.occupied { background: var(--daladala-green); color: white; }
+    .seat.free { background: #e9ecef; color: #6c757d; }
+    .jumbotron-alert {
+      background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+      border-left: 6px solid #f39c12;
+      border-radius: 16px; padding: 20px;
+      animation: pulseAlert 1.5s infinite;
+    }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .fade-in { animation: fadeIn 0.32s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    /* ===== AUTH PAGES ===== */
+    .auth-wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      background: #f4f7f6;
+    }
+    .auth-hero {
+      flex: 1.15;
+      background: linear-gradient(145deg, #0e3d1c 0%, #1e7e34 60%, #2ecc71 140%);
+      color: white;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 70px;
+      position: relative;
+      overflow: hidden;
+    }
+    .auth-hero::before {
+      content: '';
+      position: absolute;
+      width: 500px; height: 500px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 50%;
+      top: -180px; right: -180px;
+    }
+    .auth-hero::after {
+      content: '';
+      position: absolute;
+      width: 350px; height: 350px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 50%;
+      bottom: -130px; left: -130px;
+    }
+    .auth-hero h1 { font-weight: 800; font-size: 2.5rem; line-height: 1.2; margin-bottom: 18px; z-index: 1; }
+    .auth-hero p { font-size: 1.05rem; opacity: 0.9; max-width: 480px; z-index: 1; }
+    .hero-feature {
+      display: flex; align-items: flex-start; gap: 14px;
+      margin-top: 26px; z-index: 1;
+    }
+    .hero-feature i {
+      font-size: 1.5rem; color: var(--daladala-accent);
+      background: rgba(255,255,255,0.12);
+      padding: 10px; border-radius: 12px;
+    }
+    .hero-feature div strong { display: block; font-weight: 600; }
+    .hero-feature div small { opacity: 0.75; font-size: 0.85rem; }
+    .auth-form-side {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 24px;
+      background: #ffffff;
+      overflow-y: auto;
+    }
+    .auth-form-card {
+      width: 100%;
+      max-width: 440px;
+      animation: fadeIn 0.4s ease-in;
+    }
+    .auth-logo {
+      width: 64px; height: 64px;
+      background: var(--daladala-light);
+      color: var(--daladala-green);
+      border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; margin-bottom: 16px;
+    }
+    .role-tabs {
+      display: flex; gap: 8px; margin-bottom: 24px;
+      background: #f1f5f3; padding: 6px; border-radius: 16px;
+    }
+    .role-tab {
+      flex: 1; padding: 12px 8px; text-align: center;
+      border-radius: 12px; cursor: pointer; font-weight: 600;
+      font-size: 0.85rem; color: #6c757d; border: none; background: transparent;
+      transition: all 0.18s; display: flex; flex-direction: column;
+      align-items: center; gap: 4px;
+    }
+    .role-tab i { font-size: 1.15rem; }
+    .role-tab.active {
+      background: white; color: var(--daladala-green);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    }
+    .role-tab:hover:not(.active) { color: var(--daladala-green); }
+    .auth-panel { display: none; }
+    .auth-panel.active { display: block; animation: fadeIn 0.3s ease-in; }
+    .form-floating > label { color: #6c757d; font-weight: 500; }
+    .form-control, .form-select {
+      border-radius: 12px;
+      border: 1.5px solid #e3e8e6;
+      padding: 14px 16px;
+      transition: border-color 0.18s, box-shadow 0.18s;
+      font-size: 0.95rem;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--daladala-green);
+      box-shadow: 0 0 0 4px rgba(30,126,52,0.12);
+    }
+    .btn-auth {
+      border-radius: 14px;
+      padding: 14px;
+      font-weight: 600;
+      font-size: 1.02rem;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-auth:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(30,126,52,0.25); }
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      color: #adb5bd; font-size: 0.82rem; margin: 22px 0;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: #e3e8e6;
+    }
+    .demo-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+    .demo-chip {
+      flex: 1; min-width: 120px;
+      border: 1.5px solid #e3e8e6; border-radius: 12px;
+      padding: 10px 12px; cursor: pointer; text-align: left;
+      background: white; transition: all 0.18s;
+    }
+    .demo-chip:hover { border-color: var(--daladala-green); background: var(--daladala-light); }
+    .demo-chip strong { display: block; font-size: 0.85rem; color: var(--daladala-dark); }
+    .demo-chip small { color: #6c757d; font-size: 0.75rem; }
+    @media (min-width: 992px) {
+      .auth-hero { display: flex; }
+    }
+    @media (max-width: 992px) {
+      .sidebar { position: fixed; width: 280px; left: -280px; }
+      .sidebar.show { left: 0; }
+      .sidebar-toggler { display: inline-block; }
+      .main-content { margin-left: 0 !important; }
+    }
+    .custom-toast {
+      min-width: 280px; margin-bottom: 10px; border-radius: 12px;
+      padding: 14px 18px; color: white; box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+      display: flex; align-items: center; justify-content: space-between;
+      animation: slideIn 0.3s ease-out;
+    }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+    .custom-toast .btn-close { filter: invert(1); opacity: 0.8; }
+    .passenger-badge {
+      background: var(--daladala-teal); color: white;
+      padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- AUTH WRAPPER (login + passenger register)                     -->
+<!-- ============================================================ -->
+<div id="authWrapper" class="auth-wrapper">
+  <div class="auth-hero">
+    <div style="position:relative;z-index:1;">
+      <div style="font-size:3rem; margin-bottom:10px; opacity:0.95;"><i class="bi bi-bus-front-fill"></i></div>
+      <h1>Daladala Passenger System</h1>
+      <p>Passenger Journey & Service Accountability for Urban Daladala Transport in Dar es Salaam, Tanzania.</p>
+      <div class="hero-feature">
+        <i class="bi bi-speedometer2"></i>
+        <div>
+          <strong>Real‑time occupancy monitoring</strong>
+          <small>Track onboard passengers and available seats instantly.</small>
+        </div>
+      </div>
+      <div class="hero-feature">
+        <i class="bi bi-bell-fill"></i>
+        <div>
+          <strong>Destination alerts</strong>
+          <small>Never miss a passenger's stop with automatic alerts.</small>
+        </div>
+      </div>
+      <div class="hero-feature">
+        <i class="bi bi-shield-check"></i>
+        <div>
+          <strong>Service accountability</strong>
+          <small>Transparent fare transactions and complaint management.</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-form-side">
+    <div class="auth-form-card">
+      <div class="auth-logo"><i class="bi bi-bus-front"></i></div>
+      <h3 class="fw-bold mb-1" style="color: var(--daladala-dark);">Welcome back</h3>
+      <p class="text-muted small mb-4">Sign in to manage journeys or register as a passenger.</p>
+
+      <div class="role-tabs">
+        <button class="role-tab active" data-role="conductor" onclick="switchAuthRole('conductor')">
+          <i class="bi bi-person-badge"></i>Conductor
+        </button>
+        <button class="role-tab" data-role="admin" onclick="switchAuthRole('admin')">
+          <i class="bi bi-shield-lock"></i>Admin
+        </button>
+        <button class="role-tab" data-role="passenger" onclick="switchAuthRole('passenger')">
+          <i class="bi bi-person-plus"></i>Passenger
+        </button>
+      </div>
+
+      <!-- CONDUCTOR / ADMIN LOGIN PANEL -->
+      <div id="loginPanel" class="auth-panel active">
+        <form onsubmit="handleLogin(event)">
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Username</label>
+            <input type="text" id="loginUsername" class="form-control" placeholder="Enter username" value="conductor1" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Password</label>
+            <input type="password" id="loginPassword" class="form-control" placeholder="Enter password" value="demo123" required>
+          </div>
+          <button type="submit" class="btn btn-green btn-auth w-100 mt-2">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+          </button>
+        </form>
+
+        <div class="divider">Quick demo access</div>
+        <div class="demo-chips">
+          <div class="demo-chip" onclick="fillDemo('conductor')">
+            <strong><i class="bi bi-person-badge me-1"></i>Conductor</strong>
+            <small>conductor1 / demo123</small>
+          </div>
+          <div class="demo-chip" onclick="fillDemo('admin')">
+            <strong><i class="bi bi-shield-lock me-1"></i>Administrator</strong>
+            <small>admin1 / admin123</small>
+          </div>
+        </div>
+        <p class="text-muted small text-center mt-4 mb-0">Prototype only — authentication is simulated.</p>
+      </div>
+
+      <!-- PASSENGER REGISTRATION PANEL -->
+      <div id="registerPanel" class="auth-panel">
+        <form onsubmit="handlePassengerRegister(event)">
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Full Name</label>
+            <input type="text" id="regName" class="form-control" placeholder="e.g. Amani Mwakyusa" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Phone Number</label>
+            <input type="tel" id="regPhone" class="form-control" placeholder="e.g. 0712 345 678" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Username</label>
+            <input type="text" id="regUsername" class="form-control" placeholder="Choose a username" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Password</label>
+            <input type="password" id="regPassword" class="form-control" placeholder="Create a password (min 6 chars)" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Preferred Route (optional)</label>
+            <select id="regRoute" class="form-select">
+              <option value="">Select a route...</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-green btn-auth w-100 mt-2">
+            <i class="bi bi-person-check me-2"></i>Create Passenger Account
+          </button>
+        </form>
+        <p class="text-muted small text-center mt-3 mb-0">
+          Already have an account? <a href="#" onclick="switchAuthRole('conductor'); return false;" class="text-success fw-semibold">Sign in</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MAIN APP                                                      -->
+<!-- ============================================================ -->
+<div id="appView" style="display: none;">
+  <div class="d-flex">
+    <nav id="sidebar" class="sidebar d-flex flex-column flex-shrink-0 p-0" style="width: 262px;">
+      <div class="brand">
+        <i class="bi bi-bus-front-fill"></i>
+        <div>
+          Daladala
+          <small>Passenger System</small>
+        </div>
+      </div>
+      <div class="flex-grow-1 overflow-auto">
+        <ul class="nav nav-pills flex-column mb-auto mt-2" id="navLinks"></ul>
+      </div>
+      <div class="p-3 border-top border-secondary border-opacity-25">
+        <div class="d-flex align-items-center text-white">
+          <div class="rounded-circle bg-success d-flex align-items-center justify-content-center me-2" style="width:38px;height:38px;">
+            <i class="bi bi-person-fill"></i>
+          </div>
+          <div class="flex-grow-1">
+            <div class="fw-semibold small" id="sidebarUserName">Conductor</div>
+            <div class="text-white-50 small" id="sidebarUserRole">Conductor</div>
+          </div>
+          <button class="btn btn-sm btn-outline-light ms-1" onclick="handleLogout()" title="Logout">
+            <i class="bi bi-box-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="main-content flex-grow-1 p-0" style="margin-left: 0;">
+      <nav class="navbar navbar-light bg-white shadow-sm px-3 py-2 sticky-top">
+        <div class="d-flex align-items-center">
+          <button class="btn btn-outline-success sidebar-toggler me-2" onclick="toggleSidebar()">
+            <i class="bi bi-list"></i>
+          </button>
+          <span class="navbar-brand mb-0 h5 fw-bold text-success" id="topBarTitle">Dashboard</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-light text-success border border-success">
+            <span class="live-dot"></span>LIVE
+          </span>
+          <span class="text-muted small d-none d-md-inline" id="topBarTime"></span>
+        </div>
+      </nav>
+
+      <div class="container-fluid p-3 p-md-4" id="viewContainer"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="modal fade" id="genericModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" id="genericModalContent"></div>
+  </div>
+</div>
+
+<script>
+// ======================== SAFE STORAGE ========================
+const STORAGE_KEY = 'daladala_system_v6';
+
+const safeStorage = {
+  available: (() => {
+    try {
+      const t = '__test__';
+      localStorage.setItem(t, t);
+      localStorage.removeItem(t);
+      return true;
+    } catch (e) { return false; }
+  })(),
+  memoryStore: {},
+  getItem(key) {
+    if (this.available) {
+      try { return localStorage.getItem(key); } catch (e) { return this.memoryStore[key] || null; }
+    }
+    return this.memoryStore[key] || null;
+  },
+  setItem(key, value) {
+    if (this.available) {
+      try { localStorage.setItem(key, value); return; } catch (e) {}
+    }
+    this.memoryStore[key] = value;
+  },
+  removeItem(key) {
+    if (this.available) {
+      try { localStorage.removeItem(key); } catch (e) {}
+    }
+    delete this.memoryStore[key];
+  }
+};
+
+// ======================== DATA LAYER ========================
+function getSeedData() {
+  // Pre-seed with a passenger demo account and a completed trip
+  return {
+    users: [
+      { id: 'U001', username: 'conductor1', password: 'demo123', name: 'Demo Conductor', role: 'conductor', vehicleId: 'V001' },
+      { id: 'U002', username: 'admin1', password: 'admin123', name: 'Demo Admin', role: 'admin' },
+      { id: 'P001', username: 'passenger1', password: 'pass123', name: 'Amina Hassan', role: 'passenger', phone: '0712 345 678' }
+    ],
+    passengers: [
+      { id: 'P001', username: 'passenger1', password: 'pass123', name: 'Amina Hassan', phone: '0712 345 678', role: 'passenger', registeredAt: new Date().toISOString() }
+    ],
+    vehicles: [
+      { id: 'V001', reg: 'T 123 ABC', capacity: 30 },
+      { id: 'V002', reg: 'T 456 DEF', capacity: 28 }
+    ],
+    routes: [
+      { id: 'R001', name: 'Posta–Mbezi', stops: ['Posta','Kariakoo','Magomeni','Mwenge','Ubungo','Kimara','Mbezi'] },
+      { id: 'R002', name: 'Kariakoo–Ubungo', stops: ['Kariakoo','Magomeni','Mwenge','Ubungo'] },
+      { id: 'R003', name: 'Mwenge–Tegeta', stops: ['Mwenge','Tegeta'] }
+    ],
+    stops: [
+      { id: 'S001', name: 'Posta' }, { id: 'S002', name: 'Kariakoo' }, { id: 'S003', name: 'Magomeni' },
+      { id: 'S004', name: 'Mwenge' }, { id: 'S005', name: 'Ubungo' }, { id: 'S006', name: 'Kimara' },
+      { id: 'S007', name: 'Mbezi' }, { id: 'S008', name: 'Tegeta' }
+    ],
+    fares: {
+      'Posta-Kariakoo': 400, 'Posta-Magomeni': 500, 'Posta-Mwenge': 700, 'Posta-Ubungo': 1000, 'Posta-Kimara': 1200, 'Posta-Mbezi': 1500,
+      'Kariakoo-Magomeni': 400, 'Kariakoo-Mwenge': 600, 'Kariakoo-Ubungo': 1000, 'Kariakoo-Kimara': 1200, 'Kariakoo-Mbezi': 1500,
+      'Magomeni-Mwenge': 400, 'Magomeni-Ubungo': 700, 'Magomeni-Kimara': 900, 'Magomeni-Mbezi': 1200,
+      'Mwenge-Ubungo': 400, 'Mwenge-Kimara': 700, 'Mwenge-Mbezi': 1000,
+      'Ubungo-Kimara': 500, 'Ubungo-Mbezi': 800, 'Kimara-Mbezi': 600,
+      'Mwenge-Tegeta': 800
+    },
+    // Pre-seeded Journey for Passenger 1
+    journeys: [
+      { id: 'JNY-0001', vehicleId: 'V001', conductorId: 'U001', routeId: 'R001', startStop: 'Posta', currentStop: 'Mwenge', startTime: new Date(Date.now() - 3600000).toISOString(), endTime: null, status: 'Active' }
+    ],
+    // Pre-seeded Passenger Journey for Passenger 1
+    passengerJourneys: [
+      { id: 'PJ-0001', journeyId: 'JNY-0001', vehicleId: 'V001', boardingStop: 'Magomeni', destination: 'Mwenge', fare: 700, paid: 1000, paymentMethod: 'Cash', status: 'Onboard', boardTime: new Date(Date.now() - 1800000).toISOString(), alightStop: null, alightTime: null, passengerUserId: 'P001' }
+    ],
+    transactions: [
+      { id: 'TXN-0001', passengerJourneyId: 'PJ-0001', fare: 700, paid: 1000, change: 300, paymentMethod: 'Cash', dateTime: new Date(Date.now() - 1800000).toISOString() }
+    ],
+    complaints: [],
+    settings: { nextPJ: 2, nextTXN: 2, nextCMP: 1, nextJNY: 2, nextUser: 2 }
+  };
+}
+
+let DB = {};
+let currentUser = null;
+let activeJourneyId = null;
+let currentView = 'dashboard';
+let charts = {};
+let liveRefreshInterval = null;
+let selectedAuthRole = 'conductor';
+
+function loadDB() {
+  const raw = safeStorage.getItem(STORAGE_KEY);
+  if (raw) {
+    try { DB = JSON.parse(raw); } catch(e) { DB = getSeedData(); }
+  } else {
+    DB = getSeedData();
+  }
+  const seed = getSeedData();
+  for (const k in seed) {
+    if (!DB[k]) DB[k] = seed[k];
+  }
+  if (!DB.settings) DB.settings = seed.settings;
+  saveDB();
+}
+
+function saveDB() {
+  safeStorage.setItem(STORAGE_KEY, JSON.stringify(DB));
+}
+
+function nextId(prefix, key) {
+  const n = DB.settings[key] || 1;
+  DB.settings[key] = n + 1;
+  saveDB();
+  return prefix + String(n).padStart(4, '0');
+}
+
+function getVehicle(id) { return DB.vehicles.find(v => v.id === id); }
+function getRoute(id) { return DB.routes.find(r => r.id === id); }
+function getUser(id) { return DB.users.find(u => u.id === id); }
+function getActiveJourneyForVehicle(vehicleId) {
+  return DB.journeys.find(j => j.vehicleId === vehicleId && j.status === 'Active');
+}
+function getJourneyById(id) { return DB.journeys.find(j => j.id === id); }
+
+// ======================== TOAST ========================
+function toast(msg, type = 'success') {
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+  const id = 'toast-' + Date.now() + Math.random().toString(36).slice(2,6);
+  const bg = type === 'success' ? '#198754' : type === 'danger' ? '#dc3545' : type === 'warning' ? '#ffc107' : '#6c757d';
+  const textColor = type === 'warning' ? '#212529' : '#fff';
+  const icon = type === 'success' ? 'bi-check-circle' : type === 'danger' ? 'bi-exclamation-triangle' : 'bi-info-circle';
+
+  if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
+    const html = `
+      <div id="${id}" class="toast align-items-center text-white border-0" style="background:${bg};color:${textColor};" role="alert">
+        <div class="d-flex">
+          <div class="toast-body"><i class="bi ${icon} me-2"></i>${msg}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>`;
+    container.insertAdjacentHTML('beforeend', html);
+    const el = document.getElementById(id);
+    new bootstrap.Toast(el, { delay: 4000 }).show();
+    el.addEventListener('hidden.bs.toast', () => el.remove());
+  } else {
+    const el = document.createElement('div');
+    el.id = id;
+    el.className = 'custom-toast';
+    el.style.background = bg;
+    el.style.color = textColor;
+    el.innerHTML = `<div><i class="bi ${icon} me-2"></i>${msg}</div>
+      <button type="button" class="btn-close btn-close-white" onclick="document.getElementById('${id}').remove()"></button>`;
+    container.appendChild(el);
+    setTimeout(() => el.remove(), 4000);
+  }
+}
+
+// ======================== MODAL ========================
+function showModal(title, bodyHtml, footerHtml = '') {
+  const modalEl = document.getElementById('genericModal');
+  const content = document.getElementById('genericModalContent');
+  if (!content) return;
+
+  if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+    content.innerHTML = `
+      <div class="modal-header">
+        <h5 class="modal-title">${title}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">${bodyHtml}</div>
+      ${footerHtml ? `<div class="modal-footer">${footerHtml}</div>` : ''}
+    `;
+    new bootstrap.Modal(modalEl).show();
+  } else {
+    content.innerHTML = `
+      <div style="padding:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <h5 style="margin:0;">${title}</h5>
+          <button onclick="closeGenericModal()" style="border:none;background:none;font-size:1.4rem;cursor:pointer;">&times;</button>
+        </div>
+        <div>${bodyHtml}</div>
+        ${footerHtml ? `<div style="margin-top:16px;text-align:right;">${footerHtml}</div>` : ''}
+      </div>`;
+    modalEl.style.display = 'block';
+    modalEl.classList.add('show');
+    modalEl.style.backgroundColor = 'rgba(0,0,0,0.5)';
+  }
+}
+
+function closeGenericModal() {
+  const modalEl = document.getElementById('genericModal');
+  if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+    const inst = bootstrap.Modal.getInstance(modalEl);
+    if (inst) inst.hide();
+  } else {
+    modalEl.style.display = 'none';
+    modalEl.classList.remove('show');
+    modalEl.style.backgroundColor = '';
+  }
+}
+
+// ======================== AUTH ROLE SWITCHING ========================
+function switchAuthRole(role) {
+  selectedAuthRole = role;
+  document.querySelectorAll('.role-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.role === role);
+  });
+  const loginPanel = document.getElementById('loginPanel');
+  const registerPanel = document.getElementById('registerPanel');
+  if (role === 'passenger') {
+    loginPanel.classList.remove('active');
+    registerPanel.classList.add('active');
+    populateRegRoutes();
+  } else {
+    registerPanel.classList.remove('active');
+    loginPanel.classList.add('active');
+    if (role === 'conductor') fillDemo('conductor');
+    else fillDemo('admin');
+  }
+}
+
+function fillDemo(role) {
+  if (role === 'conductor') {
+    document.getElementById('loginUsername').value = 'conductor1';
+    document.getElementById('loginPassword').value = 'demo123';
+  } else if (role === 'admin') {
+    document.getElementById('loginUsername').value = 'admin1';
+    document.getElementById('loginPassword').value = 'admin123';
+  }
+}
+
+function populateRegRoutes() {
+  const sel = document.getElementById('regRoute');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Select a route (optional)...</option>' +
+    DB.routes.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+}
+
+// ======================== LOGIN ========================
+function handleLogin(e) {
+  e.preventDefault();
+  const uname = document.getElementById('loginUsername').value.trim();
+  const pass = document.getElementById('loginPassword').value;
+  const user = DB.users.find(u => u.username === uname && u.password === pass);
+  if (!user) {
+    toast('Invalid username or password.', 'danger');
+    return;
+  }
+  if (selectedAuthRole === 'conductor' && user.role !== 'conductor') {
+    toast('This account is not a conductor account.', 'danger');
+    return;
+  }
+  if (selectedAuthRole === 'admin' && user.role !== 'admin') {
+    toast('This account is not an administrator account.', 'danger');
+    return;
+  }
+  // Allow passenger login if they select passenger tab
+  if (selectedAuthRole === 'passenger' && user.role !== 'passenger') {
+     toast('This account is not a passenger account.', 'danger');
+     return;
+  }
+  currentUser = user;
+  if (user.role === 'conductor') {
+    const active = getActiveJourneyForVehicle(user.vehicleId);
+    activeJourneyId = active ? active.id : null;
+  }
+  startAppSession();
+}
+
+// ======================== PASSENGER REGISTRATION ========================
+function handlePassengerRegister(e) {
+  e.preventDefault();
+  const name = document.getElementById('regName').value.trim();
+  const phone = document.getElementById('regPhone').value.trim();
+  const username = document.getElementById('regUsername').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const routeId = document.getElementById('regRoute').value;
+
+  if (!name || !phone || !username || !password) {
+    toast('Please fill in all required fields.', 'danger');
+    return;
+  }
+  if (password.length < 6) {
+    toast('Password must be at least 6 characters.', 'danger');
+    return;
+  }
+  if (DB.users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
+    toast('Username is already taken. Please choose another.', 'danger');
+    return;
+  }
+  const id = 'P' + String(DB.settings.nextUser).padStart(3, '0');
+  DB.settings.nextUser = (DB.settings.nextUser || 1) + 1;
+  
+  const newPassenger = {
+    id,
+    name,
+    phone,
+    username,
+    password,
+    role: 'passenger',
+    routeId: routeId || null,
+    registeredAt: new Date().toISOString()
+  };
+
+  // Add to both users and passengers collections
+  DB.users.push(newPassenger);
+  DB.passengers.push(newPassenger);
+  saveDB();
+  
+  toast(`Welcome ${name}! Your passenger account was created.`, 'success');
+  currentUser = newPassenger;
+  startAppSession();
+}
+
+// ======================== SESSION ========================
+function startAppSession() {
+  document.getElementById('authWrapper').style.display = 'none';
+  document.getElementById('appView').style.display = 'block';
+  document.getElementById('sidebarUserName').textContent = currentUser.name;
+  document.getElementById('sidebarUserRole').textContent =
+    currentUser.role === 'admin' ? 'Administrator' :
+    currentUser.role === 'conductor' ? 'Conductor' : 'Passenger';
+  buildSidebar();
+  const startView = currentUser.role === 'admin' ? 'adminDashboard' :
+                    currentUser.role === 'passenger' ? 'passengerDashboard' : 'dashboard';
+  navigateTo(startView);
+  startLiveRefresh();
+  toast(`Welcome, ${currentUser.name}!`, 'success');
+}
+
+function handleLogout() {
+  stopLiveRefresh();
+  currentUser = null;
+  activeJourneyId = null;
+  document.getElementById('appView').style.display = 'none';
+  document.getElementById('authWrapper').style.display = 'flex';
+  switchAuthRole('conductor');
+  Object.values(charts).forEach(c => c.destroy && c.destroy());
+  charts = {};
+}
+
+// ======================== NAVIGATION ========================
+const conductorLinks = [
+  { view: 'dashboard', label: 'Dashboard', icon: 'bi-speedometer2' },
+  { view: 'startJourney', label: 'Start Journey', icon: 'bi-play-circle' },
+  { view: 'registerPassenger', label: 'Register Passenger', icon: 'bi-person-plus' },
+  { view: 'activePassengers', label: 'Active Passengers', icon: 'bi-people' },
+  { view: 'currentStop', label: 'Current Stop & Alerts', icon: 'bi-geo-alt' },
+  { view: 'transactions', label: 'Fare Transactions', icon: 'bi-cash-coin' },
+  { view: 'journeyHistory', label: 'Journey History', icon: 'bi-clock-history' },
+  { view: 'complaints', label: 'Complaints', icon: 'bi-chat-left-text' },
+];
+const adminLinks = [
+  { view: 'adminDashboard', label: 'Dashboard', icon: 'bi-speedometer2' },
+  { view: 'vehicles', label: 'Vehicles', icon: 'bi-truck' },
+  { view: 'routes', label: 'Routes & Stops', icon: 'bi-map' },
+  { view: 'conductors', label: 'Conductors', icon: 'bi-person-badge' },
+  { view: 'passengerAccounts', label: 'Passenger Accounts', icon: 'bi-people-fill' },
+  { view: 'journeysAdmin', label: 'Journeys', icon: 'bi-signpost-split' },
+  { view: 'passengerAdmin', label: 'Passenger Records', icon: 'bi-journal-text' },
+  { view: 'transactionsAdmin', label: 'Transactions', icon: 'bi-cash-stack' },
+  { view: 'complaintsAdmin', label: 'Complaints', icon: 'bi-chat-left-text' },
+  { view: 'reports', label: 'Reports & Analytics', icon: 'bi-bar-chart' },
+  { view: 'settings', label: 'Settings', icon: 'bi-gear' },
+];
+const passengerLinks = [
+  { view: 'passengerDashboard', label: 'My Dashboard', icon: 'bi-speedometer2' },
+  { view: 'passengerTrips', label: 'My Trips', icon: 'bi-clock-history' },
+  { view: 'passengerComplaints', label: 'My Complaints', icon: 'bi-chat-left-text' },
+  { view: 'passengerProfile', label: 'My Profile', icon: 'bi-person-circle' },
+];
+
+function getLinksForRole() {
+  if (currentUser.role === 'admin') return adminLinks;
+  if (currentUser.role === 'passenger') return passengerLinks;
+  return conductorLinks;
+}
+
+function buildSidebar() {
+  const nav = document.getElementById('navLinks');
+  const links = getLinksForRole();
+  nav.innerHTML = links.map(l => `
+    <li class="nav-item">
+      <a class="nav-link" href="#" data-view="${l.view}" onclick="navigateTo('${l.view}'); return false;">
+        <i class="bi ${l.icon}"></i>${l.label}
+      </a>
+    </li>`).join('');
+}
+
+function navigateTo(view) {
+  currentView = view;
+  document.querySelectorAll('#navLinks .nav-link').forEach(a => {
+    a.classList.toggle('active', a.dataset.view === view);
+  });
+  Object.values(charts).forEach(c => c.destroy && c.destroy());
+  charts = {};
+  const container = document.getElementById('viewContainer');
+  const titleMap = {
+    dashboard: 'Conductor Dashboard', startJourney: 'Start Journey', registerPassenger: 'Register Passenger',
+    activePassengers: 'Active Passengers', currentStop: 'Current Stop & Destination Alerts',
+    transactions: 'Fare Transactions', journeyHistory: 'Journey History', complaints: 'Complaints',
+    adminDashboard: 'Administrator Dashboard', vehicles: 'Vehicle Management', routes: 'Routes & Stops',
+    conductors: 'Conductors', passengerAccounts: 'Passenger Accounts', journeysAdmin: 'Journey Records',
+    passengerAdmin: 'Passenger Journey Records', transactionsAdmin: 'Fare Transactions',
+    complaintsAdmin: 'Complaint Management', reports: 'Reports & Analytics', settings: 'Settings',
+    passengerDashboard: 'My Dashboard', passengerTrips: 'My Trips',
+    passengerComplaints: 'My Complaints', passengerProfile: 'My Profile'
+  };
+  document.getElementById('topBarTitle').textContent = titleMap[view] || 'Dashboard';
+
+  const allowed = getLinksForRole().some(l => l.view === view);
+  if (!allowed) {
+    container.innerHTML = '<div class="alert alert-warning">Access denied.</div>';
+    return;
+  }
+  renderView(view, container);
+  if (window.innerWidth < 992) document.getElementById('sidebar').classList.remove('show');
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('show');
+}
+
+// ======================== LIVE REFRESH ========================
+function startLiveRefresh() {
+  stopLiveRefresh();
+  liveRefreshInterval = setInterval(() => {
+    if (!currentUser) return;
+    if (['dashboard','activePassengers','currentStop','passengerDashboard'].includes(currentView)) {
+      const container = document.getElementById('viewContainer');
+      if (container) renderView(currentView, container);
+    }
+  }, 5000);
+}
+function stopLiveRefresh() {
+  if (liveRefreshInterval) clearInterval(liveRefreshInterval);
+  liveRefreshInterval = null;
+}
+
+// ======================== RENDER ROUTER ========================
+function renderView(view, container) {
+  container.classList.add('fade-in');
+  setTimeout(() => container.classList.remove('fade-in'), 300);
+  switch (view) {
+    case 'dashboard': renderConductorDashboard(container); break;
+    case 'startJourney': renderStartJourney(container); break;
+    case 'registerPassenger': renderRegisterPassenger(container); break;
+    case 'activePassengers': renderActivePassengers(container); break;
+    case 'currentStop': renderCurrentStop(container); break;
+    case 'transactions': renderTransactions(container); break;
+    case 'journeyHistory': renderJourneyHistory(container); break;
+    case 'complaints': renderComplaints(container); break;
+    case 'adminDashboard': renderAdminDashboard(container); break;
+    case 'vehicles': renderVehicles(container); break;
+    case 'routes': renderRoutes(container); break;
+    case 'conductors': renderConductors(container); break;
+    case 'passengerAccounts': renderPassengerAccounts(container); break;
+    case 'journeysAdmin': renderJourneysAdmin(container); break;
+    case 'passengerAdmin': renderPassengerAdmin(container); break;
+    case 'transactionsAdmin': renderTransactionsAdmin(container); break;
+    case 'complaintsAdmin': renderComplaintsAdmin(container); break;
+    case 'reports': renderReports(container); break;
+    case 'settings': renderSettings(container); break;
+    case 'passengerDashboard': renderPassengerDashboard(container); break;
+    case 'passengerTrips': renderPassengerTrips(container); break;
+    case 'passengerComplaints': renderPassengerComplaints(container); break;
+    case 'passengerProfile': renderPassengerProfile(container); break;
+    default: container.innerHTML = '<p>View not found.</p>';
+  }
+}
+
+// ======================== CONDUCTOR DASHBOARD ========================
+function renderConductorDashboard(container) {
+  const vehicle = getVehicle(currentUser.vehicleId);
+  const activeJourney = activeJourneyId ? getJourneyById(activeJourneyId) : null;
+  if (!vehicle) { container.innerHTML = '<div class="alert alert-danger">No vehicle assigned.</div>'; return; }
+
+  const route = activeJourney ? getRoute(activeJourney.routeId) : null;
+  const passengers = activeJourney ? DB.passengerJourneys.filter(p => p.journeyId === activeJourney.id) : [];
+  const boarded = passengers.length;
+  const alighted = passengers.filter(p => p.status === 'Completed').length;
+  const onboard = boarded - alighted;
+  const capacity = vehicle.capacity;
+  const available = Math.max(0, capacity - onboard);
+  const occupancyPct = capacity > 0 ? Math.min(100, Math.round((onboard / capacity) * 100)) : 0;
+  const expectedRevenue = passengers.reduce((s, p) => s + p.fare, 0);
+  const totalPaid = passengers.reduce((s, p) => s + p.paid, 0);
+
+  let capStatus = 'Normal', capClass = 'bg-success';
+  if (onboard >= capacity) { capStatus = 'FULL'; capClass = 'bg-danger'; }
+  else if (occupancyPct >= 80) { capStatus = 'Nearly Full'; capClass = 'bg-warning text-dark'; }
+
+  const currentStop = activeJourney ? (activeJourney.currentStop || activeJourney.startStop) : null;
+  const alerts = currentStop ? passengers.filter(p => p.status === 'Onboard' && p.destination === currentStop) : [];
+
+  const html = `
+    ${alerts.length > 0 ? `
+    <div class="jumbotron-alert mb-4">
+      <div class="d-flex align-items-start">
+        <i class="bi bi-bell-fill fs-1 text-warning me-3"></i>
+        <div class="flex-grow-1">
+          <h5 class="fw-bold mb-1">DESTINATION ALERT at ${currentStop}</h5>
+          <p class="mb-2"><strong>${alerts.length}</strong> passenger(s) scheduled to alight:
+            ${alerts.map(a => `<span class="badge bg-warning text-dark me-1">${a.id}</span>`).join('')}
+          </p>
+          <button class="btn btn-warning btn-sm" onclick="navigateTo('activePassengers')">
+            <i class="bi bi-people me-1"></i>Confirm Alighting
+          </button>
+        </div>
+      </div>
+    </div>` : ''}
+
+    <div class="row g-3 mb-4">
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="stat-card card p-3 h-100">
+          <div class="d-flex justify-content-between">
+            <div><div class="text-muted small">Assigned Vehicle</div><div class="fs-4 fw-bold">${vehicle.reg}</div></div>
+            <div class="stat-icon bg-green-light"><i class="bi bi-truck"></i></div>
+          </div>
+          <div class="small text-muted mt-2">Route: ${route ? route.name : 'No active journey'}</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card card p-3 h-100">
+          <div class="text-muted small">Onboard</div>
+          <div class="fs-3 fw-bold">${onboard}</div>
+          <div class="small text-muted">Capacity: ${capacity}</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card card p-3 h-100">
+          <div class="text-muted small">Available Seats</div>
+          <div class="fs-3 fw-bold ${available === 0 ? 'text-danger' : 'text-success'}">${available}</div>
+          <div class="small text-muted">Occupancy: ${occupancyPct}%</div>
+        </div>
+      </div>
+    </div>
+
+    ${activeJourney ? `
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3 col-lg-2">
+        <div class="quick-action" onclick="navigateTo('registerPassenger')">
+          <i class="bi bi-person-plus-fill"></i>
+          <div class="fw-semibold mt-1 small">Register</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2">
+        <div class="quick-action" onclick="navigateTo('activePassengers')">
+          <i class="bi bi-people-fill"></i>
+          <div class="fw-semibold mt-1 small">Alight</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2">
+        <div class="quick-action" onclick="navigateTo('currentStop')">
+          <i class="bi bi-geo-alt-fill"></i>
+          <div class="fw-semibold mt-1 small">Update Stop</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3 col-lg-2">
+        <div class="quick-action" onclick="endJourney()">
+          <i class="bi bi-stop-circle-fill text-danger"></i>
+          <div class="fw-semibold mt-1 small">End Journey</div>
+        </div>
+      </div>
+    </div>
+    ` : ''}
+
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="fw-bold mb-0"><i class="bi bi-people me-2"></i>Vehicle Occupancy</h6>
+          <span class="badge ${capClass}">${capStatus} — ${occupancyPct}%</span>
+        </div>
+        <div class="progress capacity-bar mb-2">
+          <div class="progress-bar ${onboard >= capacity ? 'bg-danger' : occupancyPct >= 80 ? 'bg-warning' : 'bg-success'}"
+               style="width: ${Math.min(100, occupancyPct)}%; transition: width 0.4s;"></div>
+        </div>
+        <div class="d-flex justify-content-between small text-muted">
+          <span>${onboard} passengers</span>
+          <span>${capacity} max</span>
+        </div>
+        ${onboard >= capacity ? '<div class="alert alert-danger mt-2 py-2 mb-0 small"><i class="bi bi-exclamation-triangle me-1"></i>Vehicle is at full capacity. No new boarding allowed.</div>' : ''}
+        <div class="seat-grid mt-3">
+          ${Array.from({length: capacity}, (_, i) => {
+            const occupied = i < onboard;
+            return `<div class="seat ${occupied ? 'occupied' : 'free'}" title="${occupied ? 'Occupied' : 'Free'}">${i+1}</div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="stat-card card p-3 text-center">
+          <div class="text-muted small">Boarded</div>
+          <div class="fs-3 fw-bold">${boarded}</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card card p-3 text-center">
+          <div class="text-muted small">Alighted</div>
+          <div class="fs-3 fw-bold">${alighted}</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card card p-3 text-center">
+          <div class="text-muted small">Expected Fare</div>
+          <div class="fs-5 fw-bold">TZS ${expectedRevenue.toLocaleString()}</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card card p-3 text-center">
+          <div class="text-muted small">Payments</div>
+          <div class="fs-5 fw-bold">TZS ${totalPaid.toLocaleString()}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold"><i class="bi bi-info-circle me-2"></i>Journey Status</h6>
+        ${activeJourney ? `
+          <p class="mb-1"><strong>Journey ID:</strong> ${activeJourney.id} &mdash; <span class="badge bg-success">Active</span></p>
+          <p class="mb-1"><strong>Start:</strong> ${new Date(activeJourney.startTime).toLocaleString()} at ${activeJourney.startStop}</p>
+          <p class="mb-1"><strong>Current Stop:</strong> <span class="badge bg-info">${currentStop}</span></p>
+        ` : `
+          <p class="text-muted">No active journey. <a href="#" onclick="navigateTo('startJourney'); return false;">Start a journey</a> to begin registering passengers.</p>
+        `}
+      </div>
+    </div>
+  `;
+  container.innerHTML = html;
+}
+
+// ======================== START JOURNEY ========================
+function renderStartJourney(container) {
+  const vehicle = getVehicle(currentUser.vehicleId);
+  const active = activeJourneyId ? getJourneyById(activeJourneyId) : null;
+  if (active) {
+    container.innerHTML = `
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>You already have an active journey (${active.id}) on vehicle ${vehicle.reg}.
+      </div>
+      <button class="btn btn-outline-danger" onclick="endJourney()"><i class="bi bi-stop-circle me-1"></i>End Current Journey</button>
+    `;
+    return;
+  }
+  const routes = DB.routes;
+  const html = `
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3"><i class="bi bi-play-circle me-2"></i>Start New Journey</h6>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Vehicle</label>
+          <input type="text" class="form-control form-control-lg" value="${vehicle.reg} (Capacity: ${vehicle.capacity})" disabled>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Route</label>
+          <select id="startRoute" class="form-select form-select-lg">
+            ${routes.map(r => `<option value="${r.id}">${r.name}</option>`).join('')}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Starting Stop</label>
+          <select id="startStop" class="form-select form-select-lg"></select>
+        </div>
+        <button class="btn btn-green btn-lg touch-btn w-100" onclick="startJourney()">
+          <i class="bi bi-play-fill me-1"></i>Start Journey
+        </button>
+      </div>
+    </div>
+  `;
+  container.innerHTML = html;
+  updateStartStops();
+  document.getElementById('startRoute').addEventListener('change', updateStartStops);
+}
+
+function updateStartStops() {
+  const routeId = document.getElementById('startRoute').value;
+  const route = getRoute(routeId);
+  const sel = document.getElementById('startStop');
+  sel.innerHTML = route.stops.map(s => `<option value="${s}">${s}</option>`).join('');
+}
+
+function startJourney() {
+  const vehicle = getVehicle(currentUser.vehicleId);
+  if (!vehicle) return toast('No vehicle assigned', 'danger');
+  if (getActiveJourneyForVehicle(vehicle.id)) return toast('Vehicle already has an active journey', 'danger');
+  const routeId = document.getElementById('startRoute').value;
+  const startStop = document.getElementById('startStop').value;
+  const route = getRoute(routeId);
+  if (!route || !route.stops.includes(startStop)) return toast('Invalid route or stop', 'danger');
+
+  const journey = {
+    id: nextId('JNY-', 'nextJNY'),
+    vehicleId: vehicle.id,
+    conductorId: currentUser.id,
+    routeId: routeId,
+    startStop: startStop,
+    currentStop: startStop,
+    startTime: new Date().toISOString(),
+    endTime: null,
+    status: 'Active'
+  };
+  DB.journeys.push(journey);
+  saveDB();
+  activeJourneyId = journey.id;
+  toast(`Journey ${journey.id} started on ${route.name}.`, 'success');
+  navigateTo('dashboard');
+}
+
+function endJourney() {
+  if (!activeJourneyId) return;
+  const j = getJourneyById(activeJourneyId);
+  if (!j) return;
+  if (!confirm(`End journey ${j.id}? All onboard passengers will remain in records.`)) return;
+  DB.passengerJourneys.filter(p => p.journeyId === j.id && p.status === 'Onboard').forEach(p => {
+    p.status = 'Completed';
+    p.alightStop = j.currentStop || j.startStop;
+    p.alightTime = new Date().toISOString();
+  });
+  j.status = 'Completed';
+  j.endTime = new Date().toISOString();
+  saveDB();
+  activeJourneyId = null;
+  toast(`Journey ${j.id} ended.`, 'warning');
+  navigateTo('dashboard');
+}
+
+// ======================== REGISTER PASSENGER ========================
+function renderRegisterPassenger(container) {
+  const journey = activeJourneyId ? getJourneyById(activeJourneyId) : null;
+  if (!journey) {
+    container.innerHTML = `<div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i>No active journey. Please <a href="#" onclick="navigateTo('startJourney'); return false;">start a journey</a> first.</div>`;
+    return;
+  }
+  const vehicle = getVehicle(journey.vehicleId);
+  const route = getRoute(journey.routeId);
+  const passengers = DB.passengerJourneys.filter(p => p.journeyId === journey.id);
+  const onboard = passengers.filter(p => p.status === 'Onboard').length;
+  if (onboard >= vehicle.capacity) {
+    container.innerHTML = `<div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>Vehicle is at full capacity (${vehicle.capacity}). Cannot register new passengers.</div>`;
+    return;
+  }
+
+  const stops = route.stops;
+  const currentStop = journey.currentStop || journey.startStop;
+  const registeredPassengers = DB.passengers || [];
+
+  const html = `
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3"><i class="bi bi-person-plus me-2"></i>Register Passenger — Journey ${journey.id}</h6>
+        <p class="small text-muted mb-2">Vehicle: ${vehicle.reg} | Capacity: ${vehicle.capacity} | Onboard: ${onboard}</p>
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-semibold">Link to Registered Passenger (optional)</label>
+            <select id="regUserId" class="form-select form-select-lg">
+              <option value="">-- Walk-in passenger --</option>
+              ${registeredPassengers.map(p => `<option value="${p.id}">${p.name} (${p.phone})</option>`).join('')}
+            </select>
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-semibold">Boarding Stop</label>
+            <select id="regBoarding" class="form-select form-select-lg">
+              ${stops.map(s => `<option value="${s}" ${s === currentStop ? 'selected' : ''}>${s}</option>`).join('')}
+            </select>
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-semibold">Destination</label>
+            <select id="regDestination" class="form-select form-select-lg">
+              ${stops.map(s => `<option value="${s}">${s}</option>`).join('')}
+            </select>
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label fw-semibold">Fare (TZS)</label>
+            <input type="number" id="regFare" class="form-control form-control-lg" value="700" min="0">
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label fw-semibold">Amount Paid (TZS)</label>
+            <input type="number" id="regPaid" class="form-control form-control-lg" value="1000" min="0">
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-semibold">Payment Method</label>
+            <select id="regPaymentMethod" class="form-select form-select-lg">
+              <option value="Cash">Cash</option>
+              <option value="Mobile Money">Mobile Money</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <div class="alert alert-info py-2" id="changeDisplay">
+              <i class="bi bi-calculator me-1"></i> Expected change: <strong>TZS <span id="changeAmount">300</span></strong>
+            </div>
+          </div>
+          <div class="col-12">
+            <button class="btn btn-green btn-lg touch-btn w-100" onclick="registerPassenger()">
+              <i class="bi bi-check-circle me-1"></i>Register Passenger
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card border-0 shadow-sm mt-3">
+      <div class="card-body">
+        <h6 class="fw-bold"><i class="bi bi-list-ul me-2"></i>Recently Registered (this journey)</h6>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead><tr><th>ID</th><th>Boarding</th><th>Destination</th><th>Fare</th><th>Paid</th><th>Change</th></tr></thead>
+            <tbody id="recentList">
+              ${passengers.slice(-5).reverse().map(p => `<tr>
+                <td>${p.id}</td><td>${p.boardingStop}</td><td>${p.destination}</td>
+                <td>TZS ${p.fare}</td><td>TZS ${p.paid}</td><td>TZS ${p.paid - p.fare}</td>
+              </tr>`).join('') || '<tr><td colspan="6" class="text-muted">No passengers yet.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+  container.innerHTML = html;
+
+  const fareInput = document.getElementById('regFare');
+  const paidInput = document.getElementById('regPaid');
+  const changeSpan = document.getElementById('changeAmount');
+  function updateChange() {
+    const fare = parseFloat(fareInput.value) || 0;
+    const paid = parseFloat(paidInput.value) || 0;
+    const change = paid - fare;
+    changeSpan.textContent = change >= 0 ? change.toLocaleString() : '0 (insufficient)';
+    changeSpan.parentElement.parentElement.className = change >= 0 ? 'alert alert-info py-2' : 'alert alert-danger py-2';
+  }
+  fareInput.addEventListener('input', updateChange);
+  paidInput.addEventListener('input', updateChange);
+  updateChange();
+
+  const destSel = document.getElementById('regDestination');
+  const boardSel = document.getElementById('regBoarding');
+  function autoFare() {
+    const board = boardSel.value, dest = destSel.value;
+    const key = `${board}-${dest}`;
+    const reverseKey = `${dest}-${board}`;
+    const f = DB.fares[key] || DB.fares[reverseKey];
+    if (f) { fareInput.value = f; updateChange(); }
+  }
+  destSel.addEventListener('change', autoFare);
+  boardSel.addEventListener('change', autoFare);
+  autoFare();
+}
+
+function registerPassenger() {
+  const journey = activeJourneyId ? getJourneyById(activeJourneyId) : null;
+  if (!journey) return toast('No active journey', 'danger');
+  const vehicle = getVehicle(journey.vehicleId);
+  const route = getRoute(journey.routeId);
+  const boarding = document.getElementById('regBoarding').value;
+  const destination = document.getElementById('regDestination').value;
+  const fare = parseFloat(document.getElementById('regFare').value);
+  const paid = parseFloat(document.getElementById('regPaid').value);
+  const method = document.getElementById('regPaymentMethod').value;
+  const userId = document.getElementById('regUserId').value;
+
+  if (!boarding || !destination) return toast('Select boarding and destination stops', 'danger');
+  if (boarding === destination) return toast('Destination must differ from boarding stop', 'danger');
+  if (!route.stops.includes(boarding) || !route.stops.includes(destination)) return toast('Stop not on this route', 'danger');
+  if (isNaN(fare) || fare <= 0) return toast('Fare must be greater than zero', 'danger');
+  if (isNaN(paid) || paid < fare) return toast('Amount paid cannot be less than fare', 'danger');
+
+  const onboard = DB.passengerJourneys.filter(p => p.journeyId === journey.id && p.status === 'Onboard').length;
+  if (onboard >= vehicle.capacity) return toast('Vehicle is full — cannot register more passengers', 'danger');
+
+  const pjId = nextId('PJ-', 'nextPJ');
+  const passenger = {
+    id: pjId, journeyId: journey.id, vehicleId: vehicle.id,
+    boardingStop: boarding, destination: destination,
+    fare: fare, paid: paid, paymentMethod: method,
+    status: 'Onboard', boardTime: new Date().toISOString(),
+    alightStop: null, alightTime: null,
+    passengerUserId: userId || null
+  };
+  DB.passengerJourneys.push(passenger);
+
+  const txnId = nextId('TXN-', 'nextTXN');
+  DB.transactions.push({
+    id: txnId, passengerJourneyId: pjId,
+    fare: fare, paid: paid, change: paid - fare,
+    paymentMethod: method, dateTime: new Date().toISOString()
+  });
+
+  saveDB();
+  toast(`Passenger ${pjId} registered. Change: TZS ${(paid - fare).toLocaleString()}`, 'success');
+  renderRegisterPassenger(document.getElementById('viewContainer'));
+}
+
+// ======================== ACTIVE PASSENGERS ========================
+function renderActivePassengers(container) {
+  const journey = activeJourneyId ? getJourneyById(activeJourneyId) : null;
+  if (!journey) {
+    container.innerHTML = `<div class="alert alert-warning">No active journey.</div>`;
+    return;
+  }
+  const passengers = DB.passengerJourneys.filter(p => p.journeyId === journey.id && p.status === 'Onboard');
+  const route = getRoute(journey.routeId);
+  const stops = route.stops;
+  const currentStop = journey.currentStop || journey.startStop;
+
+  const html = `
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="fw-bold mb-0"><i class="bi bi-people me-2"></i>Active Passengers (${passengers.length} onboard)</h6>
+          <span class="badge bg-info">Current: ${currentStop}</span>
+        </div>
+        <div class="row g-2 mb-3">
+          <div class="col-12 col-md-4">
+            <input type="text" id="searchPassenger" class="form-control" placeholder="Search by Journey ID..." oninput="filterActiveTable()">
+          </div>
+          <div class="col-6 col-md-4">
+            <select id="filterDest" class="form-select" onchange="filterActiveTable()">
+              <option value="">All destinations</option>
+              ${stops.map(s => `<option value="${s}">${s}</option>`).join('')}
+            </select>
+          </div>
+          <div class="col-6 col-md-4">
+            <select id="filterBoard" class="form-select" onchange="filterActiveTable()">
+              <option value="">All boarding stops</option>
+              ${stops.map(s => `<option value="${s}">${s}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle" id="activePassengerTable">
+            <thead><tr><th>Journey ID</th><th>Boarding</th><th>Destination</th><th>Fare</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              ${passengers.map(p => {
+                const isAtDest = p.destination === currentStop;
+                return `
+                <tr data-id="${p.id}" data-dest="${p.destination}" data-board="${p.boardingStop}" ${isAtDest ? 'class="table-warning"' : ''}>
+                  <td><strong>${p.id}</strong>${isAtDest ? ' <span class="badge bg-warning text-dark">ALERT</span>' : ''}</td>
+                  <td>${p.boardingStop}</td>
+                  <td>${p.destination}</td>
+                  <td>TZS ${p.fare}</td>
+                  <td><span class="badge bg-success">Onboard</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-danger" onclick="alightPassenger('${p.id}')">
+                      <i class="bi bi-box-arrow-right me-1"></i>Alight
+                    </button>
+                  </td>
+                </tr>`;
+              }).join('') || '<tr><td colspan="6" class="text-muted">No active passengers.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+  container.innerHTML = html;
+}
+
+function filterActiveTable() {
+  const q = (document.getElementById('searchPassenger')?.value || '').toLowerCase();
+  const dest = document.getElementById('filterDest')?.value || '';
+  const board = document.getElementById('filterBoard')?.value || '';
+  document.querySelectorAll('#activePassengerTable tbody tr').forEach(tr => {
+    const id = tr.dataset.id?.toLowerCase() || '';
+    const d = tr.dataset.dest || '';
+    const b = tr.dataset.board || '';
+    const match = (!q || id.includes(q)) && (!dest || d === dest) && (!board || b === board);
+    tr.style.display = match ? '' : 'none';
+  });
+}
+
+function alightPassenger(pjId) {
+  const p = DB.passengerJourneys.find(x => x.id === pjId);
+  if (!p || p.status !== 'Onboard') return toast('Passenger already alighted or not found', 'danger');
+  const journey = getJourneyById(p.journeyId);
+  if (!journey) return toast('Journey not found', 'danger');
+  const route = getRoute(journey.routeId);
+  const currentStop = journey.currentStop || journey.startStop;
+  const boardIdx = route.stops.indexOf(p.boardingStop);
+  const currentIdx = route.stops.indexOf(currentStop);
+  if (currentIdx < boardIdx) {
+    toast('Current stop is before the boarding stop — cannot alight here.', 'danger');
+    return;
+  }
+  if (!confirm(`Confirm alighting for ${p.id} at ${currentStop}?`)) return;
+  p.status = 'Completed';
+  p.alightStop = currentStop;
+  p.alightTime = new Date().toISOString();
+  saveDB();
+  toast(`Passenger ${p.id} alighted at ${currentStop}.`, 'success');
+  navigateTo('activePassengers');
+}
+
+// ======================== CURRENT STOP & ALERTS ========================
+function renderCurrentStop(container) {
+  const journey = activeJourneyId ? getJourneyById(activeJourneyId) : null;
+  if (!journey) { container.innerHTML = '<div class="alert alert-warning">No active journey.</div>'; return; }
+  const route = getRoute(journey.routeId);
+  const currentStop = journey.currentStop || journey.startStop;
+  const passengers = DB.passengerJourneys.filter(p => p.journeyId === journey.id && p.status === 'Onboard');
+  const alerts = passengers.filter(p => p.destination === currentStop);
+  const currentIdx = route.stops.indexOf(currentStop);
+
+  const html = `
+    <div class="row g-3">
+      <div class="col-12 col-lg-5">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h6 class="fw-bold"><i class="bi bi-geo-alt me-2"></i>Update Current Stop</h6>
+            <p class="text-muted small">Manually select the current stop. GPS is simulated.</p>
+            <div class="mb-3">
+              ${route.stops.map((s, i) => `
+                <span class="badge ${s === currentStop ? 'bg-success' : i < currentIdx ? 'bg-secondary' : 'bg-light text-dark border'} me-1 mb-1"
+                      style="cursor: pointer; padding: 8px 12px; font-size: 0.85rem;"
+                      onclick="quickUpdateStop('${s}')">
+                  ${i < currentIdx ? '✓ ' : ''}${s}
+                </span>
+              `).join('')}
+            </div>
+            <select id="currentStopSelect" class="form-select form-select-lg mb-3">
+              ${route.stops.map(s => `<option value="${s}" ${s === currentStop ? 'selected' : ''}>${s}</option>`).join('')}
+            </select>
+            <button class="btn btn-green btn-lg touch-btn w-100" onclick="updateCurrentStop()">
+              <i class="bi bi-check-circle me-1"></i>Update Stop & Check Alerts
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-7">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h6 class="fw-bold"><i class="bi bi-bell me-2"></i>Destination Alerts</h6>
+            ${alerts.length > 0 ? `
+              <div class="alert-destination p-3">
+                <h5 class="alert-heading"><i class="bi bi-exclamation-triangle-fill me-2"></i>DESTINATION ALERT</h5>
+                <p class="mb-1"><strong>${alerts.length}</strong> passenger(s) scheduled to alight at <strong>${currentStop}</strong>.</p>
+                <ul class="mb-2">${alerts.map(a => `<li>${a.id} — ${a.boardingStop} → ${a.destination}</li>`).join('')}</ul>
+                <button class="btn btn-warning btn-sm" onclick="navigateTo('activePassengers')">
+                  <i class="bi bi-people me-1"></i>Confirm Alighting
+                </button>
+              </div>
+            ` : `<p class="text-muted">No passengers have destination <strong>${currentStop}</strong>.</p>`}
+            <p class="small text-muted mt-3">Note: Alerts do not automatically mark passengers as alighted. Use the Active Passengers page to confirm alighting.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  container.innerHTML = html;
+}
+
+function quickUpdateStop(stop) {
+  const journey = activeJourneyId ? getJourneyById(activeJourneyId) : null;
+  if (!journey) return;
+  journey.currentStop = stop;
+  saveDB();
+  toast(`Current stop updated to ${stop}.`, 'info');
+  navigateTo('currentStop');
+}
+
+function updateCurrentStop() {
+  const journey = activeJourneyId ? getJourneyById(activeJourneyId) : null;
+  if (!journey) return;
+  const newStop = document.getElementById('currentStopSelect').value;
+  journey.currentStop = newStop;
+  saveDB();
+  toast(`Current stop updated to ${newStop}.`, 'info');
+  navigateTo('currentStop');
+}
+
+// ======================== TRANSACTIONS ========================
+function renderTransactions(container) {
+  const journey = activeJourneyId ? getJourneyById(activeJourneyId) : null;
+  const txns = journey ? DB.transactions.filter(t => {
+    const pj = DB.passengerJourneys.find(p => p.id === t.passengerJourneyId);
+    return pj && pj.journeyId === journey.id;
+  }) : DB.transactions;
+  const totalFare = txns.reduce((s, t) => s + t.fare, 0);
+  const totalPaid = txns.reduce((s, t) => s + t.paid, 0);
+  const totalChange = txns.reduce((s, t) => s + t.change, 0);
+
+  const html = `
+    <div class="row g-3 mb-3">
+      <div class="col-4"><div class="stat-card card p-3 text-center"><div class="text-muted small">Total Fare</div><div class="fs-5 fw-bold">TZS ${totalFare.toLocaleString()}</div></div></div>
+      <div class="col-4"><div class="stat-card card p-3 text-center"><div class="text-muted small">Total Paid</div><div class="fs-5 fw-bold">TZS ${totalPaid.toLocaleString()}</div></div></div>
+      <div class="col-4"><div class="stat-card card p-3 text-center"><div class="text-muted small">Total Change</div><div class="fs-5 fw-bold">TZS ${totalChange.toLocaleString()}</div></div></div>
+    </div>
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold"><i class="bi bi-cash-coin me-2"></i>Fare Transactions ${journey ? '(this journey)' : '(all)'}</h6>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead><tr><th>Txn ID</th><th>Passenger ID</th><th>Fare</th><th>Paid</th><th>Change</th><th>Method</th><th>Date</th></tr></thead>
+            <tbody>
+              ${txns.slice().reverse().map(t => `<tr>
+                <td>${t.id}</td><td>${t.passengerJourneyId}</td>
+                <td>TZS ${t.fare}</td><td>TZS ${t.paid}</td><td>TZS ${t.change}</td>
+                <td>${t.paymentMethod}</td><td>${new Date(t.dateTime).toLocaleString()}</td>
+              </tr>`).join('') || '<tr><td colspan="7" class="text-muted">No transactions.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+  container.innerHTML = html;
+}
+
+// ======================== JOURNEY HISTORY ========================
+function renderJourneyHistory(container) {
+  const journeys = DB.journeys.filter(j => j.conductorId === currentUser.id);
+  const html = `
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold"><i class="bi bi-clock-history me-2"></i>My Journey History</h6>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead><tr><th>Journey ID</th><th>Route</th><th>Start</th><th>End</th><th>Status</th></tr></thead>
+            <tbody>
+              ${journeys.slice().reverse().map(j => {
+                const r = getRoute(j.routeId);
+                return `<tr><td>${j.id}</td><td>${r ? r.name : '—'}</td>
+                  <td>${new Date(j.startTime).toLocaleString()}</td>
+                  <td>${j.endTime ? new Date(j.endTime).toLocaleString() : '—'}</td>
+                  <td><span class="badge ${j.status === 'Active' ? 'bg-success' : 'bg-secondary'}">${j.status}</span></td></tr>`;
+              }).join('') || '<tr><td colspan="5" class="text-muted">No journeys.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+  container.innerHTML = html;
+}
+
+// ======================== COMPLAINTS (conductor) ========================
+function renderComplaints(container) {
+  const complaints = DB.complaints;
+  const html = `
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body">
+        <h6 class="fw-bold"><i class="bi bi-chat-left-text me-2"></i>Record Complaint</h6>
+        <div class="row g-2">
+          <div class="col-12 col-md-6">
+            <label class="form-label small">Category</label>
+            <select id="cmpCategory" class="form-select">
+              <option>Overcrowding</option><option>Fare disagreement</option><option>Incorrect change</option>
+              <option>Missed destination</option><option>Poor customer service</option><option>Unsafe driving</option><option>Other</option>
+            </select>
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label small">Journey ID (optional)</label>
+            <input type="text" id="cmpJourney" class="form-control" value="${activeJourneyId || ''}" placeholder="JNY-0001">
+          </div>
+          <div class="col-12">
+            <label class="form-label small">Description</label>
+            <textarea id="cmpDesc" class="form-control" rows="2" placeholder="Describe the issue..."></textarea>
+          </div>
+          <div class="col-12">
+            <button class="btn btn-green" onclick="submitComplaint()"><i class="bi bi-send me-1"></i>Submit Complaint</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold">Recent Complaints</h6>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead><tr><th>ID</th><th>Category</th><th>Description</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody>
+              ${complaints.slice(-10).reverse().map(c => `<tr>
+                <td>${c.id}</td><td>${c.category}</td><td>${c.description.substring(0,40)}...</td>
+                <td><span class="badge ${c.status==='Pending'?'bg-warning text-dark':c.status==='Under Review'?'bg-info':'bg-success'}">${c.status}</span></td>
+                <td>${new Date(c.dateTime).toLocaleDateString()}</td>
+              </tr>`).join('') || '<tr><td colspan="5" class="text-muted">No complaints.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+  container.innerHTML = html;
+}
+
+function submitComplaint() {
+  const category = document.getElementById('cmpCategory').value;
+  const desc = document.getElementById('cmpDesc').value.trim();
+  const jid = document.getElementById('cmpJourney').value.trim();
+  if (!desc) return toast('Please provide a description', 'danger');
+  const id = nextId('CMP-', 'nextCMP');
+  DB.complaints.push({
+    id, journeyId: jid || null, vehicleId: currentUser.vehicleId || null,
+    category, description: desc, dateTime: new Date().toISOString(),
+    status: 'Pending', recordedBy: currentUser.id
+  });
+  saveDB();
+  toast(`Complaint ${id} recorded.`, 'success');
+  navigateTo('complaints');
+}
+
+// ======================== ADMIN DASHBOARD ========================
+function renderAdminDashboard(container) {
+  const totalVehicles = DB.vehicles.length;
+  const totalConductors = DB.users.filter(u => u.role === 'conductor').length;
+  const totalPassengers = DB.passengers.length;
+  const totalJourneys = DB.journeys.length;
+  const totalPassengerJourneys = DB.passengerJourneys.length;
+  const activeJourneys = DB.journeys.filter(j => j.status === 'Active').length;
+  const totalComplaints = DB.complaints.length;
+  const totalRevenue = DB.transactions.reduce((s, t) => s + t.fare, 0);
+
+  const html = `
+    <div class="row g-3 mb-4">
+      ${statCard('Vehicles', totalVehicles, 'bi-truck', 'bg-green-light')}
+      ${statCard('Conductors', totalConductors, 'bi-person-badge', 'bg-blue-light')}
+      ${statCard('Passenger Accounts', totalPassengers, 'bi-people-fill', 'bg-teal-light')}
+      ${statCard('Journeys', totalJourneys, 'bi-signpost-split', 'bg-yellow-light')}
+      ${statCard('Passenger Records', totalPassengerJourneys, 'bi-people', 'bg-green-light')}
+      ${statCard('Active Journeys', activeJourneys, 'bi-play-circle', 'bg-blue-light')}
+      ${statCard('Complaints', totalComplaints, 'bi-chat-left-text', 'bg-red-light')}
+      ${statCard('Recorded Revenue', 'TZS ' + totalRevenue.toLocaleString(), 'bi-cash-coin', 'bg-yellow-light')}
+    </div>
+    <div class="row g-3">
+      <div class="col-12 col-lg-6">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h6 class="fw-bold">Revenue by Route</h6>
+            <div class="chart-container"><canvas id="revenueChart"></canvas></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-6">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h6 class="fw-bold">Passenger Status</h6>
+            <div class="chart-container"><canvas id="passengerChart"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  container.innerHTML = html;
+
+  const routeRevenue = {};
+  DB.transactions.forEach(t => {
+    const pj = DB.passengerJourneys.find(p => p.id === t.passengerJourneyId);
+    if (!pj) return;
+    const journey = DB.journeys.find(j => j.id === pj.journeyId);
+    if (!journey) return;
+    const route = getRoute(journey.routeId);
+    const name = route ? route.name : 'Unknown';
+    routeRevenue[name] = (routeRevenue[name] || 0) + t.fare;
+  });
+  const ctx1 = document.getElementById('revenueChart').getContext('2d');
+  charts.revenue = new Chart(ctx1, {
+    type: 'bar',
+    data: { labels: Object.keys(routeRevenue), datasets: [{ label: 'Revenue (TZS)', data: Object.values(routeRevenue), backgroundColor: '#1e7e34' }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+  });
+
+  const onboardCount = DB.passengerJourneys.filter(p => p.status === 'Onboard').length;
+  const completedCount = DB.passengerJourneys.filter(p => p.status === 'Completed').length;
+  const ctx2 = document.getElementById('passengerChart').getContext('2d');
+  charts.passenger = new Chart(ctx2, {
+    type: 'doughnut',
+    data: { labels: ['Onboard', 'Completed'], datasets: [{ data: [onboardCount, completedCount], backgroundColor: ['#2ecc71', '#6c757d'] }] },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+}
+
+function statCard(label, value, icon, bgClass) {
+  return `<div class="col-6 col-md-4 col-xl-3">
+    <div class="stat-card card p-3 h-100">
+      <div class="d-flex justify-content-between align-items-start">
+        <div><div class="text-muted small">${label}</div><div class="fs-4 fw-bold">${value}</div></div>
+        <div class="stat-icon ${bgClass}"><i class="bi ${icon}"></i></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ======================== VEHICLES ========================
+function renderVehicles(container) {
+  container.innerHTML = `
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <h6 class="fw-bold mb-0"><i class="bi bi-truck me-2"></i>Vehicles</h6>
+          <button class="btn btn-green btn-sm" onclick="showAddVehicle()"><i class="bi bi-plus-lg me-1"></i>Add Vehicle</button>
+        </div>
+      </div>
+    </div>
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead><tr><th>ID</th><th>Registration</th><th>Capacity</th><th>Actions</th></tr></thead>
+            <tbody>
+              ${DB.vehicles.map(v => `<tr>
+                <td>${v.id}</td><td>${v.reg}</td><td>${v.capacity}</td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary me-1" onclick="editVehicle('${v.id}')"><i class="bi bi-pencil"></i></button>
+                  <button class="btn btn-sm btn-outline-danger" onclick="deleteVehicle('${v.id}')"><i class="bi bi-trash"></i></button>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function showAddVehicle() {
+  showModal('Add Vehicle', `
+    <div class="mb-2"><label class="form-label">Registration</label><input id="vehReg" class="form-control" placeholder="T 789 GHI"></div>
+    <div class="mb-2"><label class="form-label">Capacity</label><input id="vehCap" type="number" class="form-control" value="30"></div>
+  `, `<button class="btn btn-secondary" onclick="closeGenericModal()">Cancel</button>
+      <button class="btn btn-green" onclick="saveNewVehicle()">Save</button>`);
+}
+
+function saveNewVehicle() {
+  const reg = document.getElementById('vehReg').value.trim();
+  const cap = parseInt(document.getElementById('vehCap').value);
+  if (!reg || isNaN(cap) || cap <= 0) return toast('Invalid vehicle details', 'danger');
+  DB.vehicles.push({ id: 'V' + String(DB.vehicles.length + 1).padStart(3, '0'), reg, capacity: cap });
+  saveDB();
+  closeGenericModal();
+  toast('Vehicle added.', 'success');
+  renderVehicles(document.getElementById('viewContainer'));
+}
+
+function editVehicle(id) {
+  const v = getVehicle(id);
+  if (!v) return;
+  showModal('Edit Vehicle', `
+    <div class="mb-2"><label class="form-label">Registration</label><input id="editVehReg" class="form-control" value="${v.reg}"></div>
+    <div class="mb-2"><label class="form-label">Capacity</label><input id="editVehCap" type="number" class="form-control" value="${v.capacity}"></div>
+  `, `<button class="btn btn-secondary" onclick="closeGenericModal()">Cancel</button>
+      <button class="btn btn-green" onclick="updateVehicle('${id}')">Update</button>`);
+}
+
+function updateVehicle(id) {
+  const v = getVehicle(id);
+  v.reg = document.getElementById('editVehReg').value.trim();
+  v.capacity = parseInt(document.getElementById('editVehCap').value);
+  saveDB();
+  closeGenericModal();
+  toast('Vehicle updated.', 'success');
+  renderVehicles(document.getElementById('viewContainer'));
+}
+
+function deleteVehicle(id) {
+  if (!confirm('Delete this vehicle? Related journeys will remain.')) return;
+  DB.vehicles = DB.vehicles.filter(v => v.id !== id);
+  saveDB();
+  toast('Vehicle deleted.', 'warning');
+  renderVehicles(document.getElementById('viewContainer'));
+}
+
+// ======================== ROUTES ========================
+function renderRoutes(container) {
+  container.innerHTML = `
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <h6 class="fw-bold mb-0"><i class="bi bi-map me-2"></i>Routes</h6>
+          <button class="btn btn-green btn-sm" onclick="showAddRoute()"><i class="bi bi-plus-lg me-1"></i>Add Route</button>
+        </div>
+      </div>
+    </div>
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead><tr><th>ID</th><th>Route Name</th><th>Stops</th><th>Actions</th></tr></thead>
+            <tbody>
+              ${DB.routes.map(r => `<tr>
+                <td>${r.id}</td><td>${r.name}</td><td>${r.stops.join(' → ')}</td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary me-1" onclick="editRoute('${r.id}')"><i class="bi bi-pencil"></i></button>
+                  <button class="btn btn-sm btn-outline-danger" onclick="deleteRoute('${r.id}')"><i class="bi bi-trash"></i></button>
+                </td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function showAddRoute() {
+  showModal('Add Route', `
+    <div class="mb-2"><label class="form-label">Route Name</label><input id="routeName" class="form-control" placeholder="Posta–Kariakoo"></div>
+    <div class="mb-2"><label class="form-label">Stops (comma separated, in order)</label><input id="routeStops" class="form-control" placeholder="Posta, Kariakoo, Magomeni"></div>
+  `, `<button class="btn btn-secondary" onclick="closeGenericModal()">Cancel</button>
+      <button class="btn btn-green" onclick="saveNewRoute()">Save</button>`);
+}
+
+function saveNewRoute() {
+  const name = document.getElementById('routeName').value.trim();
+  const stops = document.getElementById('routeStops').value.split(',').map(s => s.trim()).filter(Boolean);
+  if (!name || stops.length < 2) return toast('Provide route name and at least two stops', 'danger');
+  DB.routes.push({ id: 'R' + String(DB.routes.length + 1).padStart(3, '0'), name, stops });
+  saveDB();
+  closeGenericModal();
+  toast('Route added.', 'success');
+  renderRoutes(document.getElementById('viewContainer'));
+}
+
+function editRoute(id) {
+  const r = getRoute(id);
+  if (!r) return;
+  showModal('Edit Route', `
+    <div class="mb-2"><label class="form-label">Route Name</label><input id="editRouteName" class="form-control" value="${r.name}"></div>
+    <div class="mb-2"><label class="form-label">Stops (comma separated)</label><input id="editRouteStops" class="form-control" value="${r.stops.join(', ')}"></div>
+  `, `<button class="btn btn-secondary" onclick="closeGenericModal()">Cancel</button>
+      <button class="btn btn-green" onclick="updateRoute('${id}')">Update</button>`);
+}
+
+function updateRoute(id) {
+  const r = getRoute(id);
+  r.name = document.getElementById('editRouteName').value.trim();
+  r.stops = document.getElementById('editRouteStops').value.split(',').map(s => s.trim()).filter(Boolean);
+  saveDB();
+  closeGenericModal();
+  toast('Route updated.', 'success');
+  renderRoutes(document.getElementById('viewContainer'));
+}
+
+function deleteRoute(id) {
+  if (!confirm('Delete this route? Related journeys will remain.')) return;
+  DB.routes = DB.routes.filter(r => r.id !== id);
+  saveDB();
+  toast('Route deleted.', 'warning');
+  renderRoutes(document.getElementById('viewContainer'));
+}
+
+// ======================== CONDUCTORS ========================
+function renderConductors(container) {
+  const conductors = DB.users.filter(u => u.role === 'conductor');
+  container.innerHTML = `
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold"><i class="bi bi-person-badge me-2"></i>Conductors</h6>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead><tr><th>ID</th><th>Name</th><th>Username</th><th>Vehicle</th></tr></thead>
+            <tbody>
+              ${conductors.map(c => {
+                const v = getVehicle(c.vehicleId);
+                return `<tr><td>${c.id}</td><td>${c.name}</td><td>${c.username}</td><td>${v ? v.reg : '—'}</td></tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ======================== PASSENGER ACCOUNTS ========================
+function renderPassengerAccounts(container) {
+  const passengers = DB.passengers || [];
+  container.innerHTML = `
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold"><i class="bi bi-people-fill me-2"></i>Passenger Accounts (self-registered)</h6>
+        <p class="text-muted small">Passengers who registered through the mobile app.</p>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead><tr><th>ID</th><th>Name</th><th>Phone</th><th>Username</th><th>Preferred Route</th><th>Registered</th></tr></thead>
+            <tbody>
+              ${passengers.map(p => {
+                const r = p.routeId ? getRoute(p.routeId) : null;
+                return `<tr>
+                  <td>${p.id}</td>
+                  <td>${p.name}</td>
+                  <td>${p.phone}</td>
+                  <td>${p.username}</td>
+                  <td>${r ? r.name : '—'}</td>
+                  <td>${new Date(p.registeredAt).toLocaleDateString()}</td>
+                </tr>`;
+              }).join('') || '<tr><td colspan="6" class="text-muted">No passenger accounts yet.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ======================== JOURNEYS ADMIN ========================
+function renderJourneysAdmin(container) {
+  container.innerHTML = `
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold"><i class="bi bi-signpost-split me-2"></i>All Journeys</h6>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead><tr><th>ID</th><th>Vehicle</th><th>Conductor</th><th>Route</th><th>Start</th><th>End</th><th>Status</th></tr></thead>
+            <tbody>
+              ${DB.journeys.slice().reverse().map(j => {
+                const v = getVehicle(j.vehicleId);
+                const c = getUser(j.conductorId);
+                const r = getRoute(j.routeId);
+                return `<tr><td>${j.id}</td><td>${v?.reg||'—'}</td><td>${c?.name||'—'}</td><td>${r?.name||'—'}</td>
+                  <td>${new Date(j.startTime).toLocaleString()}</td>
+                  <td>${j.endTime ? new Date(j.endTime).toLocaleString() : '—'}</td>
+                  <td><span class="badge ${j.status==='Active'?'bg-success':'bg-secondary'}">${j.status}</span></td></tr>`;
+              }).join('') || '<tr><td colspan="7" class="text-muted">No journeys.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ======================== PASSENGER ADMIN ========================
+function renderPassengerAdmin(container) {
+  container.innerHTML = `
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold"><i class="bi bi-journal-text me-2"></i>All Passenger Journey Records</h6>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead><tr><th>ID</th><th>Journey</th><th>Boarding</th><th>Destination</th><th>Fare</th><th>Paid</th><th>Status</th><th>Alight Stop</th></tr></thead>
+            <tbody>
+              ${DB.passengerJourneys.slice().reverse().map(p => `<tr>
+                <td>${p.id}</td><td>${p.journeyId}</td><td>${p.boardingStop}</td><td>${p.destination}</td>
+                <td>TZS ${p.fare}</td><td>TZS ${p.paid}</td>
+                <td><span class="badge ${p.status==='Onboard'?'bg-success':'bg-secondary'}">${p.status}</span></td>
+                <td>${p.alightStop || '—'}</td>
+              </tr>`).join('') || '<tr><td colspan="8" class="text-muted">No passenger records.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ======================== TRANSACTIONS ADMIN ========================
+function renderTransactionsAdmin(container) {
+  container.innerHTML = `
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold"><i class="bi bi-cash-stack me-2"></i>All Transactions</h6>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead><tr><th>Txn ID</th><th>Passenger ID</th><th>Fare</th><th>Paid</th><th>Change</th><th>Method</th><th>Date</th></tr></thead>
+            <tbody>
+              ${DB.transactions.slice().reverse().map(t => `<tr>
+                <td>${t.id}</td><td>${t.passengerJourneyId}</td><td>TZS ${t.fare}</td><td>TZS ${t.paid}</td>
+                <td>TZS ${t.change}</td><td>${t.paymentMethod}</td><td>${new Date(t.dateTime).toLocaleString()}</td>
+              </tr>`).join('') || '<tr><td colspan="7" class="text-muted">No transactions.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ======================== COMPLAINTS ADMIN ========================
+function renderComplaintsAdmin(container) {
+  container.innerHTML = `
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold"><i class="bi bi-chat-left-text me-2"></i>All Complaints</h6>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead><tr><th>ID</th><th>Category</th><th>Description</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+            <tbody>
+              ${DB.complaints.slice().reverse().map(c => `<tr>
+                <td>${c.id}</td><td>${c.category}</td><td>${c.description}</td>
+                <td><span class="badge ${c.status==='Pending'?'bg-warning text-dark':c.status==='Under Review'?'bg-info':'bg-success'}">${c.status}</span></td>
+                <td>${new Date(c.dateTime).toLocaleDateString()}</td>
+                <td>
+                  <select class="form-select form-select-sm" onchange="updateComplaintStatus('${c.id}', this.value)">
+                    <option ${c.status==='Pending'?'selected':''}>Pending</option>
+                    <option ${c.status==='Under Review'?'selected':''}>Under Review</option>
+                    <option ${c.status==='Resolved'?'selected':''}>Resolved</option>
+                  </select>
+                </td>
+              </tr>`).join('') || '<tr><td colspan="6" class="text-muted">No complaints.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function updateComplaintStatus(id, status) {
+  const c = DB.complaints.find(x => x.id === id);
+  if (c) { c.status = status; saveDB(); toast(`Complaint ${id} marked as ${status}.`, 'info'); }
+}
+
+// ======================== REPORTS ========================
+function renderReports(container) {
+  container.innerHTML = `
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body">
+        <h6 class="fw-bold"><i class="bi bi-bar-chart me-2"></i>Reports & Analytics</h6>
+        <div class="row g-2 mb-3">
+          <div class="col-6 col-md-3"><input type="date" id="reportFrom" class="form-control form-control-sm"></div>
+          <div class="col-6 col-md-3"><input type="date" id="reportTo" class="form-control form-control-sm"></div>
+          <div class="col-12 col-md-3"><button class="btn btn-green btn-sm w-100" onclick="refreshReports()">Apply</button></div>
+        </div>
+        <div class="row g-3">
+          <div class="col-12 col-lg-6"><div class="chart-container"><canvas id="reportRouteChart"></canvas></div></div>
+          <div class="col-12 col-lg-6"><div class="chart-container"><canvas id="reportDailyChart"></canvas></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between"><h6 class="fw-bold">Passenger Boarding Report</h6>
+          <button class="btn btn-sm btn-outline-success" onclick="exportCSV()"><i class="bi bi-download me-1"></i>CSV</button></div>
+        <div class="table-responsive">
+          <table class="table table-sm" id="reportTable">
+            <thead><tr><th>Date</th><th>Passenger</th><th>Route</th><th>Boarding</th><th>Destination</th><th>Fare</th></tr></thead>
+            <tbody id="reportBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+  refreshReports();
+}
+
+function refreshReports() {
+  const from = document.getElementById('reportFrom')?.value;
+  const to = document.getElementById('reportTo')?.value;
+  let passengers = DB.passengerJourneys;
+  if (from) passengers = passengers.filter(p => new Date(p.boardTime) >= new Date(from));
+  if (to) passengers = passengers.filter(p => new Date(p.boardTime) <= new Date(to + 'T23:59:59'));
+
+  const tbody = document.getElementById('reportBody');
+  if (tbody) {
+    tbody.innerHTML = passengers.slice().reverse().slice(0, 100).map(p => {
+      const j = DB.journeys.find(x => x.id === p.journeyId);
+      const r = j ? getRoute(j.routeId) : null;
+      return `<tr><td>${new Date(p.boardTime).toLocaleDateString()}</td><td>${p.id}</td>
+        <td>${r?.name||'—'}</td><td>${p.boardingStop}</td><td>${p.destination}</td><td>TZS ${p.fare}</td></tr>`;
+    }).join('') || '<tr><td colspan="6" class="text-muted">No records.</td></tr>';
+  }
+
+  const routeRevenue = {};
+  passengers.forEach(p => {
+    const j = DB.journeys.find(x => x.id === p.journeyId);
+    const r = j ? getRoute(j.routeId) : null;
+    const name = r?.name || 'Unknown';
+    routeRevenue[name] = (routeRevenue[name] || 0) + p.fare;
+  });
+  const ctx1 = document.getElementById('reportRouteChart');
+  if (ctx1) {
+    if (charts.reportRoute) charts.reportRoute.destroy();
+    charts.reportRoute = new Chart(ctx1, {
+      type: 'bar',
+      data: { labels: Object.keys(routeRevenue), datasets: [{ label: 'Revenue (TZS)', data: Object.values(routeRevenue), backgroundColor: '#1e7e34' }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
+  }
+
+  const daily = {};
+  passengers.forEach(p => {
+    const d = new Date(p.boardTime).toLocaleDateString();
+    daily[d] = (daily[d] || 0) + 1;
+  });
+  const ctx2 = document.getElementById('reportDailyChart');
+  if (ctx2) {
+    if (charts.reportDaily) charts.reportDaily.destroy();
+    charts.reportDaily = new Chart(ctx2, {
+      type: 'line',
+      data: { labels: Object.keys(daily), datasets: [{ label: 'Passengers', data: Object.values(daily), borderColor: '#1e7e34', fill: false }] },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+}
+
+function exportCSV() {
+  const rows = [['Date','Passenger ID','Route','Boarding','Destination','Fare']];
+  DB.passengerJourneys.forEach(p => {
+    const j = DB.journeys.find(x => x.id === p.journeyId);
+    const r = j ? getRoute(j.routeId) : null;
+    rows.push([new Date(p.boardTime).toLocaleDateString(), p.id, r?.name||'', p.boardingStop, p.destination, p.fare]);
+  });
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'daladala_report.csv';
+  a.click();
+  toast('CSV exported.', 'success');
+}
+
+// ======================== SETTINGS ========================
+function renderSettings(container) {
+  const dataSize = (JSON.stringify(DB).length / 1024).toFixed(1);
+  const storageStatus = safeStorage.available
+    ? '<span class="text-success"><i class="bi bi-check-circle me-1"></i>LocalStorage available</span>'
+    : '<span class="text-danger"><i class="bi bi-x-circle me-1"></i>LocalStorage blocked — using in-memory fallback (data will be lost on refresh)</span>';
+  container.innerHTML = `
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold"><i class="bi bi-gear me-2"></i>Settings</h6>
+        <p class="text-muted small">Prototype demonstration controls.</p>
+        <div class="alert alert-info">
+          <i class="bi bi-database me-2"></i>Storage status: ${storageStatus}
+          <br><small>Data size: <strong>${dataSize} KB</strong>. All data is cached in your browser and persists across page refreshes when LocalStorage is available.</small>
+        </div>
+        <button class="btn btn-outline-danger" onclick="resetDemoData()"><i class="bi bi-arrow-counterclockwise me-1"></i>Reset All Data to Demo</button>
+        <button class="btn btn-outline-secondary ms-2" onclick="exportAllData()"><i class="bi bi-download me-1"></i>Export JSON</button>
+        <hr>
+        <p class="small text-muted mb-0">If you see "Tracking Prevention blocked access to storage", it means your browser is blocking LocalStorage. The app will still work using an in-memory fallback, but data will be lost on refresh. To fix this, allow storage for this site in your browser settings.</p>
+      </div>
+    </div>
+  `;
+}
+
+function exportAllData() {
+  const blob = new Blob([JSON.stringify(DB, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'daladala_data_export.json';
+  a.click();
+  toast('Data exported as JSON.', 'success');
+}
+
+function resetDemoData() {
+  if (!confirm('Reset all data? This will erase all journeys, passengers, and complaints.')) return;
+  safeStorage.removeItem(STORAGE_KEY);
+  loadDB();
+  currentUser = null;
+  activeJourneyId = null;
+  stopLiveRefresh();
+  document.getElementById('appView').style.display = 'none';
+  document.getElementById('authWrapper').style.display = 'flex';
+  switchAuthRole('conductor');
+  toast('Demo data reset. Please log in again.', 'info');
+}
+
+// ======================== PASSENGER VIEWS ========================
+function renderPassengerDashboard(container) {
+  const passenger = currentUser;
+  // Filter trips where passengerUserId matches current user's ID
+  const myTrips = DB.passengerJourneys.filter(p => p.passengerUserId === passenger.id);
+  const activeTrip = myTrips.find(p => p.status === 'Onboard');
+  const myComplaints = DB.complaints.filter(c => c.recordedBy === passenger.id);
+
+  const html = `
+    <div class="row g-3 mb-4">
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="stat-card card p-3 h-100">
+          <div class="d-flex justify-content-between">
+            <div><div class="text-muted small">Welcome back</div><div class="fs-5 fw-bold">${passenger.name}</div></div>
+            <div class="stat-icon bg-teal-light"><i class="bi bi-person-circle"></i></div>
+          </div>
+          <div class="small text-muted mt-2">Phone: ${passenger.phone}</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card card p-3 h-100">
+          <div class="text-muted small">My Trips</div>
+          <div class="fs-3 fw-bold">${myTrips.length}</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card card p-3 h-100">
+          <div class="text-muted small">My Complaints</div>
+          <div class="fs-3 fw-bold">${myComplaints.length}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="quick-action" onclick="navigateTo('passengerTrips')">
+          <i class="bi bi-clock-history"></i>
+          <div class="fw-semibold mt-1 small">My Trips</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="quick-action" onclick="navigateTo('passengerComplaints')">
+          <i class="bi bi-chat-left-text"></i>
+          <div class="fw-semibold mt-1 small">Complaints</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="quick-action" onclick="navigateTo('passengerProfile')">
+          <i class="bi bi-person-circle"></i>
+          <div class="fw-semibold mt-1 small">Profile</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="quick-action" onclick="handleLogout()">
+          <i class="bi bi-box-arrow-right text-danger"></i>
+          <div class="fw-semibold mt-1 small">Logout</div>
+        </div>
+      </div>
+    </div>
+
+    ${activeTrip ? `
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <h6 class="fw-bold"><i class="bi bi-play-circle me-2"></i>Active Trip</h6>
+        <p class="mb-1"><strong>Journey ID:</strong> ${activeTrip.id}</p>
+        <p class="mb-1"><strong>Route:</strong> ${getRoute(DB.journeys.find(j => j.id === activeTrip.journeyId)?.routeId)?.name || '—'}</p>
+        <p class="mb-1"><strong>Boarding:</strong> ${activeTrip.boardingStop} → <strong>Destination:</strong> ${activeTrip.destination}</p>
+        <p class="mb-1"><strong>Fare:</strong> TZS ${activeTrip.fare} | <strong>Paid:</strong> TZS ${activeTrip.paid} | <strong>Change:</strong> TZS ${activeTrip.paid - activeTrip.fare}</p>
+        <span class="badge bg-success">Onboard</span>
+      </div>
+    </div>` : `
+    <div class="alert alert-info">
+      <i class="bi bi-info-circle me-2"></i>You have no active trip. Ask the conductor to register you when you board.
+    </div>`}
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold"><i class="bi bi-chat-left-text me-2"></i>Recent Complaints</h6>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead><tr><th>ID</th><th>Category</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody>
+              ${myComplaints.slice(-5).reverse().map(c => `<tr>
+                <td>${c.id}</td><td>${c.category}</td>
+                <td><span class="badge ${c.status==='Pending'?'bg-warning text-dark':c.status==='Under Review'?'bg-info':'bg-success'}">${c.status}</span></td>
+                <td>${new Date(c.dateTime).toLocaleDateString()}</td>
+              </tr>`).join('') || '<tr><td colspan="4" class="text-muted">No complaints yet.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+  container.innerHTML = html;
+}
+
+function renderPassengerTrips(container) {
+  // Filter trips where passengerUserId matches current user's ID
+  const myTrips = DB.passengerJourneys.filter(p => p.passengerUserId === currentUser.id);
+  container.innerHTML = `
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold"><i class="bi bi-clock-history me-2"></i>My Trips</h6>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead><tr><th>ID</th><th>Journey</th><th>Boarding</th><th>Destination</th><th>Fare</th><th>Paid</th><th>Status</th></tr></thead>
+            <tbody>
+              ${myTrips.slice().reverse().map(p => `<tr>
+                <td>${p.id}</td><td>${p.journeyId}</td><td>${p.boardingStop}</td><td>${p.destination}</td>
+                <td>TZS ${p.fare}</td><td>TZS ${p.paid}</td>
+                <td><span class="badge ${p.status==='Onboard'?'bg-success':'bg-secondary'}">${p.status}</span></td>
+              </tr>`).join('') || '<tr><td colspan="7" class="text-muted">No trips yet.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderPassengerComplaints(container) {
+  const myComplaints = DB.complaints.filter(c => c.recordedBy === currentUser.id);
+  container.innerHTML = `
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body">
+        <h6 class="fw-bold"><i class="bi bi-chat-left-text me-2"></i>File a Complaint</h6>
+        <div class="row g-2">
+          <div class="col-12 col-md-6">
+            <label class="form-label small">Category</label>
+            <select id="pCmpCategory" class="form-select">
+              <option>Overcrowding</option><option>Fare disagreement</option><option>Incorrect change</option>
+              <option>Missed destination</option><option>Poor customer service</option><option>Unsafe driving</option><option>Other</option>
+            </select>
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label small">Journey ID (optional)</label>
+            <input type="text" id="pCmpJourney" class="form-control" placeholder="JNY-0001">
+          </div>
+          <div class="col-12">
+            <label class="form-label small">Description</label>
+            <textarea id="pCmpDesc" class="form-control" rows="2" placeholder="Describe the issue..."></textarea>
+          </div>
+          <div class="col-12">
+            <button class="btn btn-green" onclick="submitPassengerComplaint()"><i class="bi bi-send me-1"></i>Submit Complaint</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold">My Complaint History</h6>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead><tr><th>ID</th><th>Category</th><th>Description</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody>
+              ${myComplaints.slice().reverse().map(c => `<tr>
+                <td>${c.id}</td><td>${c.category}</td><td>${c.description.substring(0,40)}...</td>
+                <td><span class="badge ${c.status==='Pending'?'bg-warning text-dark':c.status==='Under Review'?'bg-info':'bg-success'}">${c.status}</span></td>
+                <td>${new Date(c.dateTime).toLocaleDateString()}</td>
+              </tr>`).join('') || '<tr><td colspan="5" class="text-muted">No complaints yet.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function submitPassengerComplaint() {
+  const category = document.getElementById('pCmpCategory').value;
+  const desc = document.getElementById('pCmpDesc').value.trim();
+  const jid = document.getElementById('pCmpJourney').value.trim();
+  if (!desc) return toast('Please provide a description', 'danger');
+  const id = nextId('CMP-', 'nextCMP');
+  DB.complaints.push({
+    id, journeyId: jid || null, vehicleId: null,
+    category, description: desc, dateTime: new Date().toISOString(),
+    status: 'Pending', recordedBy: currentUser.id
+  });
+  saveDB();
+  toast(`Complaint ${id} recorded.`, 'success');
+  navigateTo('passengerComplaints');
+}
+
+function renderPassengerProfile(container) {
+  const p = currentUser;
+  const route = p.routeId ? getRoute(p.routeId) : null;
+  container.innerHTML = `
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold"><i class="bi bi-person-circle me-2"></i>My Profile</h6>
+        <div class="row g-3 mt-1">
+          <div class="col-12 col-md-6">
+            <label class="form-label small text-muted">Full Name</label>
+            <div class="form-control-plaintext fw-semibold">${p.name}</div>
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label small text-muted">Phone Number</label>
+            <div class="form-control-plaintext fw-semibold">${p.phone}</div>
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label small text-muted">Username</label>
+            <div class="form-control-plaintext fw-semibold">${p.username}</div>
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label small text-muted">Preferred Route</label>
+            <div class="form-control-plaintext fw-semibold">${route ? route.name : 'Not set'}</div>
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label small text-muted">Registered On</label>
+            <div class="form-control-plaintext fw-semibold">${new Date(p.registeredAt).toLocaleString()}</div>
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label small text-muted">Account ID</label>
+            <div class="form-control-plaintext fw-semibold">${p.id}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ======================== INITIALISE ========================
+document.addEventListener('DOMContentLoaded', () => {
+  loadDB();
+  populateRegRoutes();
+  setInterval(() => {
+    const el = document.getElementById('topBarTime');
+    if (el) el.textContent = new Date().toLocaleString();
+  }, 1000);
+
+  if (!safeStorage.available) {
+    console.warn('LocalStorage is blocked. Using in-memory fallback. Data will not persist across page refreshes.');
+  }
+});
+</script>
+</body>
+</html>
